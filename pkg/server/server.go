@@ -9,24 +9,23 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var _ interface{} = (*Server)(nil)
+
 type Server struct {
 	httpServer *http.Server
 
 	stopChan chan bool
 }
 
-func NewServer() *Server {
-	srv := &Server{
-		stopChan: make(chan bool, 1),
+func NewServer(httpServer *http.Server) *Server {
+	httpServer.Handler = addRoutes()
+
+	svr := &Server{
+		httpServer: httpServer,
+		stopChan:   make(chan bool, 1),
 	}
 
-	srv.httpServer = &http.Server{
-
-		Addr:    ":9124",
-		Handler: http.NewServeMux(),
-	}
-
-	return srv
+	return svr
 }
 
 // Start starts the server and Stop/Close it when context is Done.

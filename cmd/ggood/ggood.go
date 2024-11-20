@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	stdlog "log"
+	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -55,6 +57,13 @@ func runCmd(ctx context.Context, staticConfiguration *static.Configuration) erro
 	return nil
 }
 
-func setupServer(ctx context.Context, staticConfiguration *static.Configuration) (*server.Server, error) {
-	return server.NewServer(), nil
+func setupServer(_ context.Context, _ *static.Configuration) (*server.Server, error) {
+	httpServer := &http.Server{
+		Addr: net.JoinHostPort(static.DefaultServerHost, static.DefaultServerPort),
+		IdleTimeout: static.DefaultIdleTimeout,
+		ReadTimeout: static.DefaultReadTimeout,
+		WriteTimeout: static.DefaultWriteTimeout,
+	}
+
+	return server.NewServer(httpServer), nil
 }
