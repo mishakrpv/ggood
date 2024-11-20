@@ -20,6 +20,12 @@ func NewServer() *Server {
 		stopChan: make(chan bool, 1),
 	}
 
+	srv.httpServer = &http.Server{
+
+		Addr:    ":9124",
+		Handler: http.NewServeMux(),
+	}
+
 	return srv
 }
 
@@ -33,7 +39,12 @@ func (s *Server) Start(ctx context.Context) {
 		s.Stop()
 	}()
 
-	// start here
+	log.Info().Msgf("Server listening on %s", s.httpServer.Addr)
+
+	err := s.httpServer.ListenAndServe()
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		panic("Unexpected error while listening and serving")
+	}
 }
 
 // Wait blocks until the server shutdown.
@@ -45,21 +56,26 @@ func (s *Server) Wait() {
 func (s *Server) Stop() {
 	defer log.Info().Msg("Server stopped")
 
-	// stop here
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := s.httpServer.Shutdown(ctx); err != nil {
+		log.Error().Err(err).Msg("Server forced to shutdown with error")
+	}
 
 	s.stopChan <- true
 }
 
 // Close destroys the server.
 func (s *Server) Close() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	go func(ctx context.Context) {
 		<-ctx.Done()
 		if errors.Is(ctx.Err(), context.Canceled) {
 			return
 		} else if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			panic("Timeout while stopping traefik, killing instance ✝")
+			panic("Timeout while stopping ggood, killing instance")
 		}
 	}(ctx)
 

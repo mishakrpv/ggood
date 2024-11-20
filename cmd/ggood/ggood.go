@@ -40,7 +40,10 @@ func runCmd(ctx context.Context, staticConfiguration *static.Configuration) erro
 		log.Debug().RawJSON("staticConfiguration", jsonConf).Msg("Static configuration loaded [json]")
 	}
 
-	svr := server.NewServer()
+	svr, err := setupServer(ctx, staticConfiguration)
+	if err != nil {
+		return err
+	}
 
 	ctx, _ = signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 
@@ -50,4 +53,8 @@ func runCmd(ctx context.Context, staticConfiguration *static.Configuration) erro
 	svr.Wait()
 	log.Info().Msg("Shutting down")
 	return nil
+}
+
+func setupServer(ctx context.Context, staticCOnfiguration *static.Configuration) (*server.Server, error) {
+	return server.NewServer(), nil
 }
