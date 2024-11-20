@@ -9,8 +9,6 @@ type GgoodCmdConfiguration struct {
 
 func NewGgoodCmdConfiguration() *GgoodCmdConfiguration {
 	return &GgoodCmdConfiguration{
-		Configuration: static.Configuration{
-
-		},
+		Configuration: static.Configuration{},
 	}
 }

@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	stdlog "log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ggood/ggood/cmd"
 	"github.com/ggood/ggood/pkg/config/static"
+	"github.com/ggood/ggood/pkg/server"
 	"github.com/ggood/ggood/pkg/version"
 	"github.com/rs/zerolog/log"
 )
@@ -22,11 +26,28 @@ func main() {
 	}
 }
 
-func runCmd(_ context.Context, staticConfiguration *static.Configuration) error {
+func runCmd(ctx context.Context, staticConfiguration *static.Configuration) error {
 	setupLogger(staticConfiguration)
 
 	log.Info().Str("version", version.Version).
 		Msgf("Ggood version %s built on %s", version.Version, version.BuildDate)
 
+	jsonConf, err := json.Marshal(staticConfiguration)
+	if err != nil {
+		log.Error().Err(err).Msg("Could not marshal static configuration")
+		log.Debug().Interface("staticConfiguration", staticConfiguration).Msg("Static configuration loaded [struct]")
+	} else {
+		log.Debug().RawJSON("staticConfiguration", jsonConf).Msg("Static configuration loaded [json]")
+	}
+
+	svr := server.NewServer()
+
+	ctx, _ = signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+
+	svr.Start(ctx)
+	defer svr.Close()
+
+	svr.Wait()
+	log.Info().Msg("Shutting down")
 	return nil
 }

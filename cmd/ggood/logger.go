@@ -71,7 +71,7 @@ func getLogWriter(staticConfiguration *static.Configuration) io.Writer {
 }
 
 func getLogLevel(staticConfiguration *static.Configuration) zerolog.Level {
-	levelStr := "error"
+	levelStr := "info"
 	if staticConfiguration.Log != nil && staticConfiguration.Log.Level != "" {
 		levelStr = strings.ToLower(staticConfiguration.Log.Level)
 	}
