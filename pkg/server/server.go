@@ -18,8 +18,6 @@ type Server struct {
 }
 
 func NewServer(httpServer *http.Server) *Server {
-	httpServer.Handler = addRoutes()
-
 	svr := &Server{
 		httpServer: httpServer,
 		stopChan:   make(chan bool, 1),

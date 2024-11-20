@@ -12,7 +12,9 @@ import (
 
 	"github.com/ggood/ggood/cmd"
 	"github.com/ggood/ggood/pkg/config/static"
+	"github.com/ggood/ggood/pkg/db"
 	"github.com/ggood/ggood/pkg/server"
+	"github.com/ggood/ggood/pkg/server/handler/tcp"
 	"github.com/ggood/ggood/pkg/version"
 	"github.com/rs/zerolog/log"
 )
@@ -58,11 +60,15 @@ func runCmd(ctx context.Context, staticConfiguration *static.Configuration) erro
 }
 
 func setupServer(_ context.Context, _ *static.Configuration) (*server.Server, error) {
+
+	services := server.NewServiceContainer(db.NewSQLXDB())
+
 	httpServer := &http.Server{
-		Addr: net.JoinHostPort(static.DefaultServerHost, static.DefaultServerPort),
-		IdleTimeout: static.DefaultIdleTimeout,
-		ReadTimeout: static.DefaultReadTimeout,
+		Addr:         net.JoinHostPort(static.DefaultServerHost, static.DefaultServerPort),
+		IdleTimeout:  static.DefaultIdleTimeout,
+		ReadTimeout:  static.DefaultReadTimeout,
 		WriteTimeout: static.DefaultWriteTimeout,
+		Handler:      tcp.GetHTTPHandler(),
 	}
 
 	return server.NewServer(httpServer), nil
