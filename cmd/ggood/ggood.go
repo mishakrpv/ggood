@@ -55,6 +55,6 @@ func runCmd(ctx context.Context, staticConfiguration *static.Configuration) erro
 	return nil
 }
 
-func setupServer(ctx context.Context, staticCOnfiguration *static.Configuration) (*server.Server, error) {
+func setupServer(ctx context.Context, staticConfiguration *static.Configuration) (*server.Server, error) {
 	return server.NewServer(), nil
 }
